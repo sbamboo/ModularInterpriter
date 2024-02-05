@@ -3,7 +3,7 @@ from tojson import codaToJson
 
 import os,sys
 os.system("CLS")
-print("Simple Coda Interpriter (v1.0, by: Simon Kalmi Claesson)")
+print("Simple Coda Interpriter (v1.0, by: Simon Kalmi Claesson) [Coda_M.I_Set]")
 print("Write 'help' for help.")
 while True:
     try:
