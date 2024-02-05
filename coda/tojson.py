@@ -68,7 +68,7 @@ def createLenghtMapping(ruleset,debug=False):
     return mapping
 
 # Function to simply category selection and their related indexes. handling exclusions and all-notation.
-def passSelectionSimplifier(inputed_passRules,lengthMapping,debug=False):
+def passSelectionSimplifier(inputed_passRules,lengthMapping,fallback=["*"],debug=False):
     # join to one dictionary
     passRules = {}
     debug_keep = {}
@@ -77,13 +77,34 @@ def passSelectionSimplifier(inputed_passRules,lengthMapping,debug=False):
         value = list(part.values())[0]
         passRules[key] = value
         if debug: debug_keep[key] = {"old":value,"new":"EXCLUDED"}
+    # Check if * is used as fill-in
+    toRem = []
+    matches = {}
+    for key,value in passRules.items():
+        if key.endswith(".*"):
+            if key.startswith("!"):
+                exclusive = True
+                key = key.replace("!","",1)
+            else:
+                exclusive = False
+            parent = key[::-1].replace("*.",".",1)[::-1]
+            for key2 in lengthMapping.keys():
+                if key2.strip().startswith(parent):
+                    matches[key2] = value
+                    if key not in toRem: toRem.append(key)
+    for tr in toRem:
+        if tr in passRules.keys(): passRules.pop(tr)
+    for m in matches.keys():
+        if m not in passRules.keys():
+            if debug: debug_keep[m] = {"old":matches[m],"new":"EXCLUDED"}
+            passRules[m] = matches[m]
     # check if * should be added (if no inclusive indexes are set)
     has_inclusive = False
     _keys = list(passRules.keys())
     for rule in _keys:
         if not rule.startswith("!"):
             has_inclusive = True
-    if has_inclusive == False:
+    if has_inclusive == False and inputed_passRules != []:
         passRules["*"] = ["*"]
         _keys.append("*")
     # if * in keys add al non-existing keyss
@@ -105,12 +126,21 @@ def passSelectionSimplifier(inputed_passRules,lengthMapping,debug=False):
     # use lengthMapping to simplify the rule's indexes, also make into list of dicts just like inputed from the begining
     toReturn = []
     for key,value in passRules.items():
-        nvalue = passIndSelectionSimplifier(value,0,lengthMapping[key]-1)
-        if debug:
-            try: debug_keep[key]["new"] = nvalue
-            except: pass
-        toReturn.append( {key: nvalue} )
-        #toReturn.append( {key: value} )
+        if lengthMapping.get(key) != None:
+            #get
+            nvalue = passIndSelectionSimplifier(value,0,lengthMapping[key]-1)
+            # filter
+            filtered = []
+            for v in nvalue:
+                if v >= 0 and v <= lengthMapping[key]-1:
+                    filtered.append(v)
+            if len(filtered) == 0: filtered = fallback
+            # debug
+            if debug:
+                try: debug_keep[key]["new"] = filtered
+                except: pass
+            # append
+            toReturn.append( {key: filtered} )
     if debug:
         for key,val in debug_keep.items():
             print(f"\033[90mSelectionSimplifier> \033[34m{key}: \033[33m{val['old']} \033[90m=> \033[32m{val['new']}\033[0m")
@@ -125,7 +155,14 @@ def join_lpasses(lines,debug=False):
     markedForRem = []
     for i,line in enumerate(lines):
         sline = line.strip().lower()
-        if debug: print(f"\033[90mlPassJoiner>\033[33m {seenPass}\033[90m,\033[34m {line}\033[0m")
+        _parts = sline.split(" ")
+        checkLine = _parts[0]
+        prefix = ""
+        if "@" in checkLine:
+            prefix = checkLine.split("@")[0]
+            command = "@"+checkLine.split("@")[1]
+            sline = sline.replace(prefix,"",1)
+        if debug: print(f"\033[90mlPassJoiner>\033[33m {seenPass}\033[90m,\033[34m {sline}\033[90m,\033[31m{prefix}\033[0m")
         if sline.startswith("@pass"):
             seenPass = i
         elif sline.startswith("@lpass"):
@@ -148,7 +185,7 @@ def join_lpasses(lines,debug=False):
 
 
 # Takes Coda and returns JSON
-def codaToJson(codaString,retDict=False,prepDict=None,debug=False):
+def codaToJson(codaString,retDict=False,prepDict=None,passIndexFallback=[0],debug=False):
     lines = codaString.split("\n")
     lines = join_lpasses(lines,debug)
     if prepDict != None:
@@ -157,21 +194,24 @@ def codaToJson(codaString,retDict=False,prepDict=None,debug=False):
         jsonDict = {}
     hasshdebt = False
     for line in lines:
+        line = line.strip()
         if line.startswith("!"):
             line = line.replace("!", "", 1)
         # check for commands (prefixed by @)
-        if line.strip().startswith("@"):
+        checkLine = line.split(" ")[0]
+        if "@" in checkLine:
             # remove @
-            line = line.lstrip("@")
+            _parts = checkLine.split("@")
+            section = _parts[1].lower()
             # get command by splitting by space and rest as args
-            parts = line.split(" ")
-            section = parts[0].lower()
-            if len(parts) > 1:
-                expression = [i.lower() for i in parts[1:]]
+            parts = line.replace(checkLine,"",1).strip().split(" ")
+            if type(parts) == str: parts = [parts]
+            if len(parts) >= 1:
+                expression = [i.lower() for i in parts]
             else:
                 expression = []
             _type = "syntx_command"
-            operand = None
+            operand = _parts[0]
         # otherwise parse as rulew
         else:
             # find type:section part
@@ -234,9 +274,9 @@ def codaToJson(codaString,retDict=False,prepDict=None,debug=False):
                         # for all-notations (*) the default should be *
                         elif key == "*":
                             value = ["*"]
-                        # normal is default to 0
+                        # normal is default to 0 (set by: passIndexFallback)
                         else:
-                            value = [0]
+                            value = passIndexFallback
                     if key != "" and key != None:
                         exi = False
                         for i,_exi in enumerate(hpieces):
@@ -248,7 +288,21 @@ def codaToJson(codaString,retDict=False,prepDict=None,debug=False):
                             for v in value:
                                 if v not in hpieces[exi[0]][exi[1]]:
                                     hpieces[exi[0]][exi[1]].append(v)
-                jsonDict["passes"].append(hpieces)
+                _id = ""
+                _mode = ""
+                _link = ""
+                if "=" in operand:
+                    _id = operand.split("=")[0]
+                    _mode = operand.split("=")[1]
+                else:
+                    _mode = operand
+                if ":" in _mode:
+                    _mode = _mode.split(":")[0]
+                    _link = operand.split(":")[1]
+                if _mode == "org": _mode = "original"
+                if _mode == "rem": _mode = "remainder"
+                if _mode == "res": _mode = "result"
+                jsonDict["passes"].append({"ind":hpieces,"id":_id,"mode":_mode,"link":_link})
                 lastPassInd += 1
 
         # encase
@@ -316,7 +370,7 @@ def codaToJson(codaString,retDict=False,prepDict=None,debug=False):
                 hasshdebt = True
             print(
 f"""
-    \033[90mline:       \033[32m{line.replace('pass','@pass')}\033[90m,
+    \033[90mline:       \033[32m{line}\033[90m,
     \033[90msection:    \033[32m{section}\033[90m,
     \033[90m_type:      \033[32m{_type}\033[90m,
     \033[90moperand:    \033[32m{operand}\033[90m,
@@ -325,9 +379,17 @@ f"""
         )
 
     # Simplify passes
-    lengthMapping = createLenghtMapping(jsonDict,debug) # get length-mapping
-    for i,codapass in enumerate(jsonDict["passes"]):
-        jsonDict["passes"][i] = passSelectionSimplifier(codapass,lengthMapping,debug)
+    if jsonDict.get("passes") != None:
+        lengthMapping = createLenghtMapping(jsonDict,debug) # get length-mapping
+        toRem = []
+        for i,codapass in enumerate(jsonDict["passes"]):
+            nv = passSelectionSimplifier(codapass["ind"],lengthMapping,passIndexFallback,debug)
+            if nv != []:
+                jsonDict["passes"][i]["ind"] = nv
+            else:
+                toRem.append(i)
+        for i in toRem[::-1]:
+            jsonDict["passes"].pop(i)
 
     # return as json
     if retDict == True:

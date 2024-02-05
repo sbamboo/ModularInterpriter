@@ -33,7 +33,32 @@ run pass on:
 somehow allow "spiderweb" linking here to allow for a scenario like:
 
 @pass spacer
-result@pass keyword.operand
+1=result@pass keyword.operand
 original@pass regex.cutting
 result@pass keyword.literal
 result:1@pass regex.keeping
+
+
+Set fallback using command?
+
+@fallback 0   /   @fallback "*"   /   @fallback 1,2   /   ...
+
+These are set using same syntax as for passes.
+
+
+Passing interpriter args/settings?
+
+@opt ...
+
+Any @opt is placed into a list containing the args, so:
+`
+@opt arg1 arg2
+@opt arg3 arg4
+`
+Would be:
+`
+"options": [
+    ["arg1", "arg2"],
+    ["arg3", "arg4"]
+]
+`

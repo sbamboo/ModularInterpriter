@@ -13,6 +13,8 @@
     \\ = \
   Please note that nothing can be interprited by having nothing after section. This wont get recognised.
 
+  Exception to the general parsing rule is tex Rulesets/Passes
+
 =======[EncasedSections]=======
   Encased sections are encloser-syntaxes like parentheses and qoutes, they have two types: Bidirectional and Interchangable.
   Bidirectional encasers have a start expression and an end expression that may not be the same.
@@ -202,7 +204,7 @@
 }
 
 
-=======[Rulesets]=======
+=======[Rulesets/Passes]=======
 Rulesets are files containing the above aswell as a "passes" field, defining the order of parsing aswell as how many times the org-input should be parsed.
 The "passes" contain the "calls", calls are the accual instructions in top-down order and the passes are the runs on the org-input, the categories are split by &.
 The ruleset reference categories on the above code aswell as their sub-indexes split by commas. Not deffining a index will use ind:0
@@ -267,5 +269,75 @@ This would be the same as the JSON:
     ]
   }
 `
-
 As you see, "passes" are included as a field at the bottom refferencing rules from the root.
+
+And as you might have noticed the rules are followed by a list of ints, this is due to the index selector defaulting to 0.
+But there are other ways to help you note down indexes:
+Note! These can be stacked using commas.
+
+First your normal ones where you comma seppareate them:
+  `1`   = 1
+  `1,2` = 1, 2
+
+But you can also use * to select al, coda then generates a range based on the length of selectable indexes:
+An example where we have four selectable indexes would give:
+  `*` = [0,1,2,3]
+
+You can also use ! to exclude an index, so if we use our previous example: (combining with the star)
+  `*,!2` = [0,1,3]
+
+If only note exclusions it will auto-fill a star so for example: (still using the previous example)
+  `!2` => `*,!2` = [0,1,3]
+
+To help with including large amounts of indexes you can use ranges, theese are in the format <min>-<max>
+  `0-5` = [0,1,2,3,4,5] # note it being inclusive on both edges.
+
+You can further detail your ranges using step-size, then in the format <min>-<max>_<step>
+  `0-10_2` = [0,2,4,6,8,10]
+
+
+Some of theese can also be used when selecting which rules to run in the pass for example the previous &
+  `spacer&keyword.literal` = ["spacer", "keyword.literal"]
+
+But you can also use * here, to select al categories which have rules set,
+so for example with rules set for "spacer", "keyword.literal" and "keyword.operand":
+  `*` = ["spacer", "keyword.literal", "keyword.operand"]
+
+You can also use exclusions here and the same star-auto-fill rule applies:
+  `!spacer` => `*,!spacer` = ["keyword.literal", "keyword.operand"]
+
+Another handy short cut is fill-in, in our previous example it would allow the use of:
+  `keyword.*` => `keyword.literal,keyword.operand` = ["keyword.literal", "keyword.operand"]
+
+
+You can also be more specific in what order and relation the passes should be ran in.
+This by specifing "mode", "id" and "link" properties of the pass.
+In coda this is done by the syntax:
+`<id><mode><link>@<cmd>`
+where id is a string (recommended to use short things like numbers) followed by an equal sign,
+and link is prefixed by a colon.
+The link should be the same as another pass's id.
+Example coda:
+`
+1=org:1@pass regex 0
+`
+The modes avaliable are:
+ - original/org    : Runs the pass on the original input
+ - remainder/rem   : Runs the pass on whats left after the previous parse (the non-parsed pieces)
+ - result/res      : Runs the pass on the output of the previous parse (the parsed pieces)
+
+Theese ofcourse have a json equivilent: (Note that the mode has been made into it's "longer" form)
+`
+{
+  "passes": [
+    {
+      "ind": [
+        {"regex": [0]}
+      ],
+      "id": "1",
+      "mode": "original",
+      "link": "1"
+    }
+  ]
+}
+`

@@ -1,0 +1,48 @@
+{
+    "spacer": [
+      " "
+    ],
+    "keyword": {
+      "literal": [
+        "not"
+      ],
+      "operand": {
+        "add": [
+          "+"
+        ]
+      }
+    },
+    "regex": {
+      "keeping": {
+        "eng_alpha": [
+          "[a-z]"
+        ]
+      }
+    },
+    "passes": [
+      [
+        {
+          "spacer": [
+            0
+          ]
+        },
+        {
+          "keyword.literal": [
+            0
+          ]
+        },
+        {
+          "keyword.operand": [
+            0
+          ]
+        }
+      ],
+      [
+        {
+          "regex.keeping": [
+            0
+          ]
+        }
+      ]
+    ]
+  }
