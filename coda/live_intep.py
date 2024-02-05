@@ -14,6 +14,10 @@ while True:
         i = 2
     else:
         i = None
+    if "--d" in sys.argv:
+        _deb_codaToJson = True
+    else:
+        _deb_codaToJson = False
     if c[0] == "!":
         i = 2
     if ";" in c:
@@ -21,6 +25,7 @@ while True:
     else:
         c = [c]
     _dict = {}
+    toExec = []
     for p in c:
         if p == "exit":
             exit()
@@ -29,6 +34,7 @@ while True:
         elif p == "help":
             print("  'cls': Clears screen.\n  'exit': Exits.\n  'help': Shows this info.\n  Commands are comma sepparated.")
         else:
-            _dict = codaToJson(p,True,_dict)
+            toExec.append(p)
+    _dict.update(codaToJson('\n'.join(toExec),True,_dict,debug=_deb_codaToJson))
     if _dict != {}:
         print(json.dumps(_dict,indent=i))

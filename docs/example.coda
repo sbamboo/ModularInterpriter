@@ -1,0 +1,6 @@
+:spacer §
+literal:keyword not
+operand:keyword>add +
+keeping:regex>eng_alpha [a-z]
+@pass spacer&keyword.literal&keyword.operand
+@pass regex.keeping
