@@ -62,3 +62,8 @@ Would be:
     ["arg3", "arg4"]
 ]
 `
+
+Category selection ** for al coda no matter defined (shouldn't be used by user)
+
+default if no passes are defined to one pass of {"*": ["*"]}
+
