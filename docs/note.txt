@@ -46,24 +46,11 @@ Set fallback using command?
 These are set using same syntax as for passes.
 
 
-Passing interpriter args/settings?
-
-@opt ...
-
-Any @opt is placed into a list containing the args, so:
-`
-@opt arg1 arg2
-@opt arg3 arg4
-`
-Would be:
-`
-"options": [
-    ["arg1", "arg2"],
-    ["arg3", "arg4"]
-]
-`
-
 Category selection ** for al coda no matter defined (shouldn't be used by user)
-
-default if no passes are defined to one pass of {"*": ["*"]}
+this can be default asigned as input or set with a coda-command:
+@defcats
+Example
+`
+    @defcats keyword.operands keyword.literals
+`
 

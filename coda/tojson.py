@@ -304,6 +304,9 @@ def codaToJson(codaString,retDict=False,prepDict=None,passIndexFallback=[0],debu
                 if _mode == "res": _mode = "result"
                 jsonDict["passes"].append({"ind":hpieces,"id":_id,"mode":_mode,"link":_link})
                 lastPassInd += 1
+            elif section == "opt":
+                if jsonDict.get("options") == None: jsonDict["options"] = []
+                jsonDict["options"].append(expression)
 
         # encase
         if section == "encase":
@@ -379,7 +382,10 @@ f"""
         )
 
     # Simplify passes
-    if jsonDict.get("passes") != None:
+    exklNms = [key for key in list(jsonDict.keys()) if key not in ["passes","options"]]
+    if exklNms != []:
+        if jsonDict.get("passes") == None or jsonDict.get("passes") == []:
+                jsonDict["passes"] = [ {"ind":[{"*":["*"]}],"id":"","mode":"","link":""} ]
         lengthMapping = createLenghtMapping(jsonDict,debug) # get length-mapping
         toRem = []
         for i,codapass in enumerate(jsonDict["passes"]):

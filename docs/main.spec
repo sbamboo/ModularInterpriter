@@ -80,6 +80,24 @@
     ml interc:encase "
   `
 
+  By default encasers are found in "outer-most" matching but the option "fo" can be used to match first-occuerence.
+  `
+    {
+      "encase": {
+        "interc": [
+          {
+            "ex": '"',
+            "fo": true
+          }
+        ]
+      }
+    }
+  `
+  Coda:
+  `
+    fo interc:encase "
+  `
+
 =======[Keywords.Operands]=======
   Operands are keywords that are excluded from interpriter sections but layed as operations inbetween sections.
   They can be used for tex math, where the interpriter could take <expr> + <expr> as {"operation":"add","elem":["<expr>","<expr>"]}
@@ -338,6 +356,26 @@ Theese ofcourse have a json equivilent: (Note that the mode has been made into i
       "mode": "original",
       "link": "1"
     }
+  ]
+}
+`
+
+If no passes are sent coda will default to {"*": ["*"]}
+
+=======[Options]=======
+Options are passed to the interpriter and use the '@opt' command followed by the expression.
+The expression will be space-split into a list.
+Example:
+`
+@opt arg1 arg2
+@opt arg3 arg4
+`
+Json:
+`
+{
+  "options": [
+      ["arg1", "arg2"],
+      ["arg3", "arg4"]
   ]
 }
 `

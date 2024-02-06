@@ -18,7 +18,11 @@ while True:
         _deb_codaToJson = True
     else:
         _deb_codaToJson = False
-    if c[0] == "!":
+    if "--s" in sys.argv:
+        shortOut = True
+    else:
+        shortOut = False
+    if len(c) > 0 and c[0] == "!":
         i = 2
     if ";" in c:
         c = c.split(";")
@@ -37,4 +41,7 @@ while True:
             toExec.append(p)
     _dict.update(codaToJson('\n'.join(toExec),True,_dict,debug=_deb_codaToJson))
     if _dict != {}:
-        print(json.dumps(_dict,indent=i))
+        v = json.dumps(_dict,indent=i)
+        if shortOut:
+            v = v.replace( '"id": "", "mode": "", "link": ""',"... ",1 )
+        print(v)
