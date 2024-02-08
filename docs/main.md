@@ -90,7 +90,7 @@ For an encaser to be recognised beyond line endings they should be prefixed with
   "encase": {
     "interc": [
       {
-        "ex": '"',
+        "ex": "\"",
         "ml": true
       }
     ]
@@ -110,7 +110,7 @@ By default encasers are found in *outer-most* matching but the option `fo` can b
   "encase": {
     "interc": [
       {
-        "ex": '"',
+        "ex": "\"",
         "fo": true
       }
     ]
@@ -196,7 +196,7 @@ literal:keyword not
 
 ## <br>Spacers
 Spacers are expressions used to split sections.
-Examples:<span style="margin-left: 10px;">` `<span>
+Examples:<span style="margin-left: 10px;">` `</span>
 
 **JSON:**
 ```json
