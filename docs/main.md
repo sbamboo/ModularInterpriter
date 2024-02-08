@@ -1,104 +1,124 @@
-=======[CodaSyntax]=======
-  Coda is generally split into this context:
-  <options><type>:<section><name> <chars_and_expressions>
-  Note! The name is optional. But if a name is there it starts with >
-  Each options is followed by a space so:
-  "ml " not "ml"
-  expressions within qoutes are not allowed since the qoutes are recognised as symbols.
-  The only non-symbol recognised characters are wildcards the can be recognised by prefixing with \
-  Wildcards:
-    §  = space
-    \§ = §
-    \  = 
-    \\ = \
-  Please note that nothing can be interprited by having nothing after section. This wont get recognised.
+## <br>CodaSyntax
+Coda is generally split into this context:
 
-  Exception to the general parsing rule is tex Rulesets/Passes
+`<options><type>:<section><name> <chars_and_expressions>`
 
-=======[EncasedSections]=======
-  Encased sections are encloser-syntaxes like parentheses and qoutes, they have two types: Bidirectional and Interchangable.
-  Bidirectional encasers have a start expression and an end expression that may not be the same.
-  The interpriter can then section out anything inbetween theese symbols.
-  > Section: encase
-  > Type:    struct
-  Examples:
-    () {} []
-  Json:
-  `
-    {
-      "encase": {
-        "struct": [
-          {
-            "ex": ["(",")"]
-          }
-        ]
+Note! The name is optional. But if a name is there it starts with >
+
+Each options is followed by a space so: "ml " not "ml"
+
+Expressions within qoutes are not allowed since the qoutes are recognised as symbols.
+
+The only non-symbol recognised characters are wildcards the can be recognised by prefixing with \\
+
+Wildcards:
+>  §  = space
+>
+>  \\§ = §
+>
+>  \\  = 
+>
+>  \\\\ = \\
+
+Please note that nothing can be interprited by having nothing after section. This wont get recognised.
+
+Exception to the general parsing rule is commands like `@pass` or `@opt`
+
+## <br><br>EncasedSections
+Encased sections are encloser-syntaxes like parentheses and qoutes, they have two types: **Bidirectional** and **Interchangable**.
+
+### <br><br>Biderectional
+Bidirectional encasers have a start expression and an end expression that may not be the same.
+
+The interpriter can then section out anything inbetween theese symbols.
+>Section: encase
+>
+>Type:    struct
+
+Examples:
+`() {} []`
+
+**JSON:**
+```json
+{
+  "encase": {
+    "struct": [
+      {
+        "ex": ["(",")"]
       }
-    }
-  `
-  Coda:
-  `
-    struct:encase ( )
-  `
+    ]
+  }
+}
+```
+**CODA:**
+```lua
+struct:encase ( )
+```
+### <br><br>Interchangable
 
-  Interchangable encasers have one expression which the interpriter sections out content inbetween two instances of.
-  > Section: encase
-  > Type:    interc
-  Examples:
-    "" '' ////
-  Json:
-  `
-    {
-      "encase": {
-        "interc": [
-          {
-            "ex": '"'
-          }
-        ]
+Interchangable encasers have one expression which the interpriter sections out content inbetween two instances of.
+
+> Section: encase
+>
+> Type:    interc
+
+Examples:
+`"" '' ////`
+
+**JSON:**
+```json
+{
+  "encase": {
+    "interc": [
+      {
+        "ex": "\""
       }
-    }
-  `
-  Coda:
-  `
-    interc:encase "
-  `
+    ]
+  }
+}
+```
+**CODA:**
+```lua
+interc:encase "
+```
 
-  For an encaser to be recognised beyond line endings they should be prefixed with 'ml ' in Coda or by setting "ml" to True in json.
-  `
-    {
-      "encase": {
-        "interc": [
-          {
-            "ex": '"',
-            "ml": true
-          }
-        ]
-      }
+For an encaser to be recognised beyond line endings they should be prefixed with 'ml ' in Coda or by setting "ml" to True in json.
+`
+  {
+    "encase": {
+      "interc": [
+        {
+          "ex": '"',
+          "ml": true
+        }
+      ]
     }
-  `
-  Coda:
-  `
-    ml interc:encase "
-  `
+  }
+`
+Coda:
+`
+  ml interc:encase "
+`
 
-  By default encasers are found in "outer-most" matching but the option "fo" can be used to match first-occuerence.
-  `
-    {
-      "encase": {
-        "interc": [
-          {
-            "ex": '"',
-            "fo": true
-          }
-        ]
-      }
+By default encasers are found in "outer-most" matching but the option "fo" can be used to match first-occuerence.
+`
+  {
+    "encase": {
+      "interc": [
+        {
+          "ex": '"',
+          "fo": true
+        }
+      ]
     }
-  `
-  Coda:
-  `
-    fo interc:encase "
-  `
+  }
+`
+Coda:
+`
+  fo interc:encase "
+`
 
-=======[Keywords.Operands]=======
+## <br>Keywords.Operands
   Operands are keywords that are excluded from interpriter sections but layed as operations inbetween sections.
   They can be used for tex math, where the interpriter could take <expr> + <expr> as {"operation":"add","elem":["<expr>","<expr>"]}
   > Section: keyword
@@ -138,7 +158,7 @@
     operand:keyword +
   `
 
-=======[Keywords.Literals]=======
+## <br>Keywords.Literals
   Literals are specific keywords that can be excluded from sectioning and added for context just like operands.
   > Sections: keyword
   > Type:     literal
@@ -159,7 +179,7 @@
     literal:keyword not
   `
 
-=======[Spacers]=======
+## <br>Spacers
   Spacers are expressions used to split sections.
   Examples:
     ' '
@@ -176,7 +196,7 @@
     :spacer §
   `
 
-=======[REGEX]=======
+## <br>REGEX
   Regex matches are placed as interpriter sections, they can be cutting or keeping.
   Cutting meaning that the matches get removed from the string before next parse and keeping won't, giving you a wide range of options.
   The matches are bound to a name just like operands and no bound will similarly be bound to "ambi" or ambiguous.
@@ -203,26 +223,7 @@
     cutting:regex>eng_alpha [a-z]
   `
 
-=======[InterpriterData]=======
-# example + of not input
-{
-  "sections": {
-    0: "example",
-    1: "of",
-    2: "input"
-  },
-  "context": {
-    "operation": [
-      {"add":[0,1]}
-    ],
-    "keywords": [
-      {"not":[1,2]}
-    ]
-  }
-}
-
-
-=======[Rulesets/Passes]=======
+## <br>Rulesets/Passes
 Rulesets are files containing the above aswell as a "passes" field, defining the order of parsing aswell as how many times the org-input should be parsed.
 The "passes" contain the "calls", calls are the accual instructions in top-down order and the passes are the runs on the org-input, the categories are split by &.
 The ruleset reference categories on the above code aswell as their sub-indexes split by commas. Not deffining a index will use ind:0
@@ -360,9 +361,9 @@ Theese ofcourse have a json equivilent: (Note that the mode has been made into i
 }
 `
 
-If no passes are sent coda will default to {"*": ["*"]}
+If no passes are sent coda will default to `{"*": ["*"]}`, or depending on fallback `{"*": <fallback>}`
 
-=======[Options]=======
+## <br>Options
 Options are passed to the interpriter and use the '@opt' command followed by the expression.
 The expression will be space-split into a list.
 Example:
@@ -379,3 +380,51 @@ Json:
   ]
 }
 `
+
+## <br>Fallback
+When parsing @pass commands and their indexes if an index is invalid or out-of-range it is set to a fallback, this is given as an argument to the codaToJson function.
+But you can define a overwrite to this using the @fallback command, it's syntax is: `@fallback <fallback>` where <fallback> uses the same syntax as when deffining a pass index.
+
+!NOTE! THE FALLBACK COMMAND CAN BE SET TO INVALID OR OUT-OF-RANGE VALUES WHICH BREAKS THE INTERPRITERS ABILITY TO SELECT PASS-CATEGORIES, SO USE WITH CAUTION ON YOUR OWN RISK!
+
+Examples:
+`
+@fallback 0
+@fallback "*"
+@fallback 1,2
+@fallback 1-10
+`
+Due to the way commands are parsed you may also write a list of indexes space seppareated:
+`
+@fallback 1 2 == @fallback 1,2
+`
+
+The fallbacks are set within the coda-parser so the interprited dosen't really have to care about it, thus it has no real meaning to be added into the output JSON,
+however to be informative any set fallbacks (not the default ones) will be added as an option:
+`
+{
+  "options": {
+    [
+      ["fallback",<fallback>]
+    ]
+  }
+}
+`
+
+## <br>InterpriterData
+# example + of not input
+{
+  "sections": {
+    0: "example",
+    1: "of",
+    2: "input"
+  },
+  "context": {
+    "operation": [
+      {"add":[0,1]}
+    ],
+    "keywords": [
+      {"not":[1,2]}
+    ]
+  }
+}

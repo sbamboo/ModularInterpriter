@@ -39,13 +39,6 @@ result@pass keyword.literal
 result:1@pass regex.keeping
 
 
-Set fallback using command?
-
-@fallback 0   /   @fallback "*"   /   @fallback 1,2   /   ...
-
-These are set using same syntax as for passes.
-
-
 Category selection ** for al coda no matter defined (shouldn't be used by user)
 this can be default asigned as input or set with a coda-command:
 @defcats

@@ -55,7 +55,7 @@ def passIndSelectionSimplifier(indexes,min=int,max=int):
 def createLenghtMapping(ruleset,debug=False):
     mapping = {}
     for key,value in ruleset.items():
-        if key != "passes":
+        if key not in ["passes","options"]:
             if type(value) == dict:
                 for key2,value2 in value.items():
                     mapping[key+"."+key2] = len(value2)
@@ -68,7 +68,7 @@ def createLenghtMapping(ruleset,debug=False):
     return mapping
 
 # Function to simply category selection and their related indexes. handling exclusions and all-notation.
-def passSelectionSimplifier(inputed_passRules,lengthMapping,fallback=["*"],debug=False):
+def passSelectionSimplifier(inputed_passRules,lengthMapping,fallback=["*"],orgFallback=[0],debug=False):
     # join to one dictionary
     passRules = {}
     debug_keep = {}
@@ -129,12 +129,50 @@ def passSelectionSimplifier(inputed_passRules,lengthMapping,fallback=["*"],debug
         if lengthMapping.get(key) != None:
             #get
             nvalue = passIndSelectionSimplifier(value,0,lengthMapping[key]-1)
-            # filter
+            # filter al values outside min/max (0-amntFound)
             filtered = []
             for v in nvalue:
                 if v >= 0 and v <= lengthMapping[key]-1:
                     filtered.append(v)
-            if len(filtered) == 0: filtered = fallback
+            # Check if the fallback is a range or all-notation (*)
+            needParse = False
+            isRange = False
+            for v in fallback:
+                if type(v) != int:
+                    if v == "*":
+                        needParse = True
+                        break
+                    elif "-" in v or "_" in v:
+                        isRange = True
+                        needParse = True
+                        break
+            # If no values where left alter filtering then use fallback
+            if len(filtered) == 0:
+                # If the fallback needs parsing (is a range or all-notation) then parse it
+                if needParse == True:
+                    # Make a copy of the length mapping (so if the fallback is a range we can alter the lengthMapping to fit the range)
+                    localLengthMapping = lengthMapping.copy()
+                    # If the fallback is a range, alter the lengthMapping to fit the range
+                    if isRange == True:
+                        for v in fallback:
+                            if "-" in v:
+                                # Exclude step
+                                if "_" in v:
+                                    v = v.split("_")[0]
+                                # Set the lengthMapping to the range-max+1
+                                localLengthMapping[key] = int(v.split("-")[1])+1
+                    # Parse the fallback so we get it as a list of indexes/ints (Also pass the original-fallback incase the fallback would turn out to be invalid, just as a security messure)
+                    filtered = passSelectionSimplifier([{"*":fallback}],localLengthMapping,fallback=orgFallback,orgFallback=orgFallback,debug=debug)
+                    # the above function returns a list of dicts including the indexes, but we only want said indexes so lets extract them
+                    nFiltered = []
+                    for p in filtered:
+                        if type(p) == dict:
+                            nFiltered.extend(list(p.values())[0])
+                    # Set the filtered list to the parsed fallback indexes
+                    filtered = nFiltered
+                # If the fallback dosen't need parsing just set it
+                else:
+                    filtered = fallback
             # debug
             if debug:
                 try: debug_keep[key]["new"] = filtered
@@ -186,6 +224,17 @@ def join_lpasses(lines,debug=False):
 
 # Takes Coda and returns JSON
 def codaToJson(codaString,retDict=False,prepDict=None,passIndexFallback=[0],debug=False):
+    """
+This function takes in a Coda-String (Syntax: Coda_M.I_Set), and converts it to JSON.
+It support getting multiple lines if sepparated by \n, so ";" has no use here, if you want it to wrapp this function with a replace.
+Arguments:
+    codaString=str: The Coda-String to convert to JSON.
+    retDict=bool: If True, the function will return a dictionary instead of a JSON-string.
+    prepDict=dict: A "default" dictionary that the parsed data will be appended to, if None, a new dictionary will be created.
+    passIndexFallback=list: If you are working with @pass deffinitions and the function retrives an invalid or out-of-range index this will be used instead.
+    debug=bool: If True, the function will print debug info for each line.
+    """
+    orgFallback = passIndexFallback.copy()
     lines = codaString.split("\n")
     lines = join_lpasses(lines,debug)
     if prepDict != None:
@@ -307,6 +356,22 @@ def codaToJson(codaString,retDict=False,prepDict=None,passIndexFallback=[0],debu
             elif section == "opt":
                 if jsonDict.get("options") == None: jsonDict["options"] = []
                 jsonDict["options"].append(expression)
+            elif section == "fallback":
+                passIndexFallback = []
+                expressionIndexes = []
+                for e in expression:
+                    if "," in e:
+                        expressionIndexes.extend(e.split(","))
+                    else:
+                        expressionIndexes.append(e)
+                for i in expressionIndexes:
+                    if "'" in i: i = i.replace("'","")
+                    elif '"' in i: i = i.replace('"',"")
+                    if i != "*" and "-" not in i and "_" not in i: i = int(i)
+                    passIndexFallback.append(i)
+                #passIndexFallback = [int(i) for i in expression if i != "*"]
+                if jsonDict.get("options") == None: jsonDict["options"] = []
+                jsonDict["options"].append(["fallback",passIndexFallback])
 
         # encase
         if section == "encase":
@@ -389,8 +454,15 @@ f"""
         lengthMapping = createLenghtMapping(jsonDict,debug) # get length-mapping
         toRem = []
         for i,codapass in enumerate(jsonDict["passes"]):
-            nv = passSelectionSimplifier(codapass["ind"],lengthMapping,passIndexFallback,debug)
+            nv = passSelectionSimplifier(codapass["ind"],lengthMapping,passIndexFallback,orgFallback,debug)
             if nv != []:
+                for i2,v2 in enumerate(nv):
+                    key = list(v2.keys())[0]
+                    value = list(v2.values())[0]
+                    seen = []
+                    for i3 in value:
+                        if i3 not in seen: seen.append(i3)
+                    nv[i2][key] = seen
                 jsonDict["passes"][i]["ind"] = nv
             else:
                 toRem.append(i)
