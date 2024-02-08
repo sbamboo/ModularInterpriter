@@ -82,119 +82,134 @@ Examples:
 interc:encase "
 ```
 
-For an encaser to be recognised beyond line endings they should be prefixed with 'ml ' in Coda or by setting "ml" to True in json.
-`
-  {
-    "encase": {
-      "interc": [
-        {
-          "ex": '"',
-          "ml": true
-        }
-      ]
-    }
-  }
-`
-Coda:
-`
-  ml interc:encase "
-`
+For an encaser to be recognised beyond line endings they should be prefixed with `ml ` in c oda or by setting `ml` to `True` in json.
+**JSON:**
 
-By default encasers are found in "outer-most" matching but the option "fo" can be used to match first-occuerence.
-`
-  {
-    "encase": {
-      "interc": [
-        {
-          "ex": '"',
-          "fo": true
-        }
-      ]
-    }
+```json
+{
+  "encase": {
+    "interc": [
+      {
+        "ex": '"',
+        "ml": true
+      }
+    ]
   }
-`
-Coda:
-`
-  fo interc:encase "
-`
+}
+```
+**CODA:**
+```lua
+ml interc:encase "
+```
+
+By default encasers are found in *outer-most* matching but the option `fo` can be used to match first-occuerence.
+
+**JSON:**
+```json
+{
+  "encase": {
+    "interc": [
+      {
+        "ex": '"',
+        "fo": true
+      }
+    ]
+  }
+}
+```
+**CODA:**
+```lua
+fo interc:encase "
+```
 
 ## <br>Keywords.Operands
-  Operands are keywords that are excluded from interpriter sections but layed as operations inbetween sections.
-  They can be used for tex math, where the interpriter could take <expr> + <expr> as {"operation":"add","elem":["<expr>","<expr>"]}
-  > Section: keyword
-  > Type:    operand
-  Examples:
-    +
+Operands are keywords that are excluded from interpriter sections but layed as operations inbetween sections.
 
-  They can be listed under an operation like "add":
-  Json:
-  `
-    {
-      "keyword": {
-        "operand": {
-          "add": ["+"]
-        }
-      }
-    }
-  `
-  Coda:
-  `
-    operand:keyword>add +
-  `
+They can be used for tex math, where the interpriter could take `<expr> + <expr>` as 
+`{"operation":"add","elem":["<expr>","<expr>"]}`
 
-  Or under no operation which in json would lead to "ambi" or ambiguous:
-  Json:
-  `
-    {
-      "keyword": {
-        "operand": {
-          "ambi": ["+"]
-        }
-      }
+> Section: keyword
+>
+> Type:    operand
+
+Examples:
+`+`
+
+They can be listed under an operation like `add`:
+
+**JSON:**
+```json
+{
+  "keyword": {
+    "operand": {
+      "add": ["+"]
     }
-  `
-  Coda:
-  `
-    operand:keyword +
-  `
+  }
+}
+```
+**CODA:**
+```lua
+operand:keyword>add +
+```
+
+Or under no operation which in json would lead to `ambi` or ambiguous:
+
+**JSON:**
+```json
+{
+  "keyword": {
+    "operand": {
+      "ambi": ["+"]
+    }
+  }
+}
+```
+**CODA:**
+```lua
+operand:keyword +
+```
 
 ## <br>Keywords.Literals
-  Literals are specific keywords that can be excluded from sectioning and added for context just like operands.
-  > Sections: keyword
-  > Type:     literal
-  Examples:
-    not
-  Json:
-  `
-    {
-      "keyword": {
-        "literal": [
-          "not"
-        ]
-      }
-    }
-  `
-  Coda:
-  `
-    literal:keyword not
-  `
+Literals are specific keywords that can be excluded from sectioning and added for context just like operands.
+
+> Sections: keyword
+>
+> Type:     literal
+
+Examples:
+`not`
+
+**JSON:**
+```json
+{
+  "keyword": {
+    "literal": [
+      "not"
+    ]
+  }
+}
+```
+**CODA:**
+```lua
+literal:keyword not
+```
 
 ## <br>Spacers
-  Spacers are expressions used to split sections.
-  Examples:
-    ' '
-  Json:
-  `
-    {
-      "spacer": [
-        " "
-      ]
-    }
-  `
-  Coda:
-  `
-    :spacer §
-  `
+Spacers are expressions used to split sections.
+Examples:<span style="margin-left: 10px;">` `<span>
+
+**JSON:**
+```json
+{
+  "spacer": [
+    " "
+  ]
+}
+```
+**CODA:**
+```lua
+:spacer §
+```
 
 ## <br>REGEX
   Regex matches are placed as interpriter sections, they can be cutting or keeping.
