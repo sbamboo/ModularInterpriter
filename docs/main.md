@@ -1,3 +1,5 @@
+If you are not viewing this through github you can see view it at: [sbamboo.github.io/docview](https://sbamboo.github.io/docview/?markdown=https://raw.githubusercontent.com/sbamboo/ModularInterpriter/main/docs/main.md)
+
 ## <br>CodaSyntax
 Coda is generally split into this context:
 
