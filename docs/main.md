@@ -1,4 +1,4 @@
-If you are not viewing this through github you can see view it at: [sbamboo.github.io/websa/docview](https://sbamboo.github.io/websa/docview/?markdown=https://raw.githubusercontent.com/sbamboo/ModularInterpriter/main/docs/main.md)
+<span style="display: none">If you are reading this and want a rendered view, see it through github or on: [sbamboo.github.io/websa/docview](https://sbamboo.github.io/websa/docview/?markdown=https://raw.githubusercontent.com/sbamboo/ModularInterpriter/main/docs/main.md)</span>
 
 ## <br>CodaSyntax
 Coda is generally split into this context:
