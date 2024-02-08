@@ -449,6 +449,30 @@ however to be informative any set fallbacks *(not the default ones)* will be add
 }
 ```
 
+## <br>Double-Star Expressions
+Coda has a feature for pass-categories to auto-fill al categories in spec, no matter them being included in the rules. This is done by setting the category to `**`.
+
+For example:
+> `@pass **` => `@pass encase.struct&encase.interc&keyword.operand&keyword.literal&regex.cutting&...` and so on.
+>
+> You may also select indexes:
+>
+> `@pass ** 1` => `@pass encase.struct 1&encase.interc 1&...` and so on.
+
+The list of argument to be filled by double-stars is sent as an argument to the codaToJson function.
+
+But you can also use the `@defcats` command to overwrite theese. It uses the syntax `@defcats <categories_split_by_space>`
+
+**Example Coda**:
+```lua
+@defcats spacer encase.struct
+```
+
+You can also reset it to the default values using:
+```lua
+@defcats reset
+```
+
 ## <br>InterpriterData
 Text used in example: `example + of not input`
 ```json

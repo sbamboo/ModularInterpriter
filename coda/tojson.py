@@ -223,7 +223,7 @@ def join_lpasses(lines,debug=False):
 
 
 # Takes Coda and returns JSON
-def codaToJson(codaString,retDict=False,prepDict=None,passIndexFallback=[0],debug=False):
+def codaToJson(codaString,retDict=False,prepDict=None,passIndexFallback=[0],passCategories=["encase.struct","encase.interc","keyword.operand","keyword.literal","regex.cutting","regex.keepning","spacer"],debug=False):
     """
 This function takes in a Coda-String (Syntax: Coda_M.I_Set), and converts it to JSON.
 It support getting multiple lines if sepparated by \n, so ";" has no use here, if you want it to wrapp this function with a replace.
@@ -234,6 +234,7 @@ Arguments:
     passIndexFallback=list: If you are working with @pass deffinitions and the function retrives an invalid or out-of-range index this will be used instead.
     debug=bool: If True, the function will print debug info for each line.
     """
+    overwrittenDefaultCategories = None
     orgFallback = passIndexFallback.copy()
     lines = codaString.split("\n")
     lines = join_lpasses(lines,debug)
@@ -307,6 +308,27 @@ Arguments:
                 if jsonDict.get("passes") == None: jsonDict["passes"] = []
                 pieces = ' '.join(expression)
                 pieces = pieces.split("&")
+                starStarFilteredPieces = []
+                hasStarStars = False
+                # handle **
+                for p in pieces:
+                    partsSs = p.split(" ")
+                    if partsSs[0] == "**":
+                        if hasStarStars == False: hasStarStars = True
+                        if len(partsSs) > 1:
+                            val = ' '.join(partsSs[1:])
+                        else:
+                            val = ""
+                            for i in passIndexFallback:
+                                val += str(i)
+                        
+                        if overwrittenDefaultCategories == None:
+                            for cat in passCategories:
+                                starStarFilteredPieces.append(f"{cat} {val}")
+                        else:
+                            for cat in overwrittenDefaultCategories:
+                                starStarFilteredPieces.append(f"{cat} {val}")
+                if hasStarStars == True: pieces = starStarFilteredPieces
                 # get indexes for piece
                 hpieces = []
                 for p in pieces:
@@ -372,7 +394,11 @@ Arguments:
                 #passIndexFallback = [int(i) for i in expression if i != "*"]
                 if jsonDict.get("options") == None: jsonDict["options"] = []
                 jsonDict["options"].append(["fallback",passIndexFallback])
-
+            elif section == "defcats":
+                if expression[0] == "reset":
+                    overwrittenDefaultCategories = None
+                else:
+                    overwrittenDefaultCategories = expression
         # encase
         if section == "encase":
             if jsonDict.get("encase") == None: jsonDict["encase"] = {}
