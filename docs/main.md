@@ -21,6 +21,8 @@ Wildcards:
 >  \\  = 
 >
 >  \\\\ = \\
+>
+>  §nl§ = newline
 
 Please note that nothing can be interprited by having nothing after section. This wont get recognised.
 
@@ -244,6 +246,55 @@ Examples:
 **CODA:**
 ```lua
 cutting:regex>eng_alpha [a-z]
+```
+
+## <br>Replaceables
+Replaceables allows you to specify keywords to be replaced with other keywords.
+
+These are entered as pairs to be replaced so every other item is toBeReplaced and toBeReplacedWith.
+
+> Section: replaceable
+
+Example Coda:
+> `:replaceable h3llo hello` means al `h3llo` is to be replaced with `hello`.
+> 
+> `:replaceable h1llo hello h2llo h3llo` means al `h1llo` is to be replaced with `hello` and al `h2llo` with `h3llo`. *(So they can be stacked)*
+
+Note! Uneaven argument amounts will be trimmed to even so if an uneaven amount is given the last item will be ignored.
+
+**JSON:**
+```json
+{
+  "replaceable": {
+    "h1llo": "hello",
+    "h2llo": "h3llo"
+  }
+}
+```
+**CODA:**
+```lua
+:replaceable h1llo hello h2llo h3llo
+```
+
+## <br>Sections
+Sections allows defines splits in your syntax, for example newlines.
+
+> Section: section
+
+Examples:
+`§nl§` section split by newlines.
+
+**JSON:**
+```json
+{
+  "section": [
+    "\n"
+  ]
+}
+```
+**CODA:**
+```lua
+:section §nl§
 ```
 
 ## <br>Rulesets/Passes

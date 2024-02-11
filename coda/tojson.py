@@ -221,9 +221,17 @@ def join_lpasses(lines,debug=False):
         lines.pop(ind)
     return lines
 
+def get_pairs_and_trim(lst):
+    # Trim the list to have an even number of elements
+    trimmed_lst = lst[:len(lst) - len(lst) % 2]
+    
+    # Generate pairs
+    pairs = [(trimmed_lst[i], trimmed_lst[i + 1]) for i in range(0, len(trimmed_lst), 2)]
+    
+    return pairs
 
 # Takes Coda and returns JSON
-def codaToJson(codaString,retDict=False,prepDict=None,passIndexFallback=[0],passCategories=["encase.struct","encase.interc","keyword.operand","keyword.literal","regex.cutting","regex.keepning","spacer"],debug=False):
+def codaToJson(codaString,retDict=False,prepDict=None,passIndexFallback=[0],passCategories=["encase.struct","encase.interc","keyword.operand","keyword.literal","regex.cutting","regex.keepning","spacer","replaceable"],debug=False):
     """
 This function takes in a Coda-String (Syntax: Coda_M.I_Set), and converts it to JSON.
 It support getting multiple lines if sepparated by \n, so ";" has no use here, if you want it to wrapp this function with a replace.
@@ -290,6 +298,7 @@ Arguments:
             _expression = []
             for exp in expression:
                 if exp.strip() != "":
+                    exp = exp.replace("§nl§","\n")
                     exp = exp.replace("\\§","%1")
                     exp = exp.replace("§"," ")
                     exp = exp.replace("%1","§")
@@ -457,6 +466,20 @@ Arguments:
                 for p in expression:
                     if p not in jsonDict["regex"]["keeping"][operand]:
                         jsonDict["regex"]["keeping"][operand].append(p)
+
+        # replaceable
+        elif section == "replaceable":
+            if jsonDict.get("replaceable") == None: jsonDict["replaceable"] = {}
+            pairs = get_pairs_and_trim(expression)
+            for pair in pairs:
+                jsonDict["replaceable"][pair[0]] = pair[1]
+
+        # sectionsplit
+        elif section == "section":
+            if jsonDict.get("section") == None: jsonDict["section"] = []
+            for p in expression:
+                if p not in jsonDict["section"]:
+                    jsonDict["section"].append(p)
 
         if debug:
             if hasshdebt == False:
