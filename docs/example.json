@@ -1,48 +1,92 @@
 {
-    "spacer": [
-      " "
+  "encase": {
+    "struct": [
+      {
+        "ex": [
+          "(",
+          ")"
+        ]
+      }
     ],
-    "keyword": {
-      "literal": [
-        "not"
-      ],
-      "operand": {
-        "add": [
-          "+"
-        ]
+    "interc": [
+      {
+        "ex": "\""
       }
-    },
-    "regex": {
-      "keeping": {
-        "eng_alpha": [
-          "[a-z]"
-        ]
-      }
-    },
-    "passes": [
-      [
-        {
-          "spacer": [
-            0
-          ]
-        },
-        {
-          "keyword.literal": [
-            0
-          ]
-        },
-        {
-          "keyword.operand": [
-            0
-          ]
-        }
-      ],
-      [
-        {
-          "regex.keeping": [
-            0
-          ]
-        }
-      ]
     ]
-  }
+  },
+  "keyword": {
+    "operand": {
+      "add": [
+        "+"
+      ],
+      "ambi": [
+        "-",
+        "/",
+        "*",
+        "^"
+      ]
+    },
+    "literal": [
+      "not"
+    ]
+  },
+  "spacer": [
+    " "
+  ],
+  "regex": {
+    "cutting": {
+      "words": [
+        "[a-z]?"
+      ]
+    },
+    "keeping": {
+      "eng_alpha": [
+        "[a-z]"
+      ]
+    }
+  },
+  "replaceable": {
+    "%replace-me%": "!REPLACED!"
+  },
+  "section": [
+    "\n"
+  ],
+  "passes": [
+    [
+      {
+        "encase.interc": [0]
+      }, {
+        "section": [0]
+      }
+    ], [
+      {
+        "encase.struct": [0]
+      }, {
+        "spacer": [0]
+      }, {
+        "keyword.operand": [0]
+      },
+      {
+        "keyword.literal": [0]
+      }, {
+        "regex.cutting": [0]
+      }, {
+        "regex.keeping": [0]
+      }
+    ], [
+      {
+        "encase.struct": [0]
+      }, {
+        "spacer": [0]
+      }, {
+        "keyword.operand": [0]
+      }, {
+        "keyword.literal": [0]
+      }, {
+        "regex.cutting": [0]
+      }, {
+        "regex.keeping": [0]
+      }
+    ]
+  ]
+}

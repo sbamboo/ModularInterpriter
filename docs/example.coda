@@ -1,6 +1,16 @@
-:spacer §
-literal:keyword not
+struct:encase ( )
+interc:encase "
+ml interc encase `
+fo interc encase '
 operand:keyword>add +
+operand:keyword - / * ^
+literal:keyword not
+:spacer §
+cutting:regex>words [a-z]?
 keeping:regex>eng_alpha [a-z]
-@pass spacer&keyword.literal&keyword.operand
-@pass regex.keeping
+:replaceable %replace-me% !REPLACED!
+:section §nl§
+1=@pass encase.interc&section
+2=org:1@pass encase.encase
+3=res:2@pass encase.struct&keyword.*&spacer&regex.*&replaceable
+4=rem:2@pass encase.struct&keyword.*&spacer&regex.*&replaceable

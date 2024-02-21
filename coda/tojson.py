@@ -503,6 +503,15 @@ f"""
         lengthMapping = createLenghtMapping(jsonDict,debug) # get length-mapping
         toRem = []
         for i,codapass in enumerate(jsonDict["passes"]):
+            _hasFixedSyntx = False
+            if type(codapass) == list or (type(codapass) == dict and codapass.get("ind") == None):
+                _hasFixedSyntx = True
+                codapass = {
+                    "ind": codapass,
+                    "id": "",
+                    "mode": "",
+                    "link": ""
+                }
             nv = passSelectionSimplifier(codapass["ind"],lengthMapping,passIndexFallback,orgFallback,debug)
             if nv != []:
                 for i2,v2 in enumerate(nv):
@@ -512,6 +521,8 @@ f"""
                     for i3 in value:
                         if i3 not in seen: seen.append(i3)
                     nv[i2][key] = seen
+                    if _hasFixedSyntx == True:
+                        jsonDict["passes"][i] = codapass
                 jsonDict["passes"][i]["ind"] = nv
             else:
                 toRem.append(i)
