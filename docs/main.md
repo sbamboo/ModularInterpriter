@@ -444,13 +444,59 @@ Theese of course have a json equivilent: *(Note that the mode has been made into
       ],
       "id": "1",
       "mode": "original",
-      "link": "1"
+      "link": "1",
+      "filters": []
     }
   ]
 }
 ```
 
 If no passes are sent coda will default to `{"*": ["*"]}`, or depending on fallback `{"*": <fallback>}`
+
+### For further control with type-options:
+When working with types that have options (for example `encasers` with their `ml` and `fo` options) you can use filters to select which option a pass should run.
+
+This is done by modifying the `mode` to use the syntax `<mode>_<options>`. *(Or the complete pass asignment syntax `<id><mode>_<options><link>@<cmd>`)*
+
+Options are sepparated by `&`, for example to select al `encase.interc` with the option `ml` set to true:
+```lua
+1=org_ml:1@pass encase.interc
+```
+
+Or with both `ml` and `fo` selected:
+```lua
+1=org_ml&fo:1@pass encase.interc
+```
+
+This of course has a json equivilent and uses the previously ignored `filters` field.
+```json
+{
+  "passes": [
+    {
+      "ind": [
+        {"regex": [0]}
+      ],
+      "id": "1",
+      "mode": "original",
+      "link": "1",
+      "filters": ["ml","fo"]
+    }
+  ]
+}
+```
+
+**Note! Filters appply to al applicable categories in the type, so if you want to apply filters for only a specific category use multiple passes**
+```lua
+1=org_ml&fo@pass encase.interc
+2=res:1@pass <anotherTypeUsingOptions>
+```
+*(Pass2 is linked to `result` but could of course be linked to `remainder`)*
+
+**Further filtering:**
+
+You can also futher filter options by excluding them, this is done by prefixing them with `!`, for example `!ml`.
+
+To filter to only rules without any options specified you can set the filter to `!!`.
 
 ## <br>Options
 Options are passed to the interpriter and use the `@opt` command followed by the expression.

@@ -1,7 +1,11 @@
+# Deffine the rules to be applied first 
+ml interc:encase `
+
+# Deffine the other rules
+:section §nl§
 struct:encase ( )
-interc:encase "
-ml interc encase `
-fo interc encase '
+interc:encase '
+fo interc:encase "
 operand:keyword>add +
 operand:keyword - / * ^
 literal:keyword not
@@ -9,8 +13,12 @@ literal:keyword not
 cutting:regex>words [a-z]?
 keeping:regex>eng_alpha [a-z]
 :replaceable %replace-me% !REPLACED!
-:section §nl§
-1=@pass encase.interc&section
-2=org:1@pass encase.encase
-3=res:2@pass encase.struct&keyword.*&spacer&regex.*&replaceable
-4=rem:2@pass encase.struct&keyword.*&spacer&regex.*&replaceable
+
+# Resolve multi-line encasers first then section the input
+1=org_ml@pass encase.interc
+
+# On the picked out parts from pass1 (the result) apply the other rules
+2=res_!ml:1@pass section&encase.*&keyword.*&spacer&regex.*&replaceable
+
+# On the parts not picked out in pass1 (the remainder) apply the other rules aswell
+3=rem_!ml:1@pass section&encase.*&keyword.*&spacer&regex.*&replaceable

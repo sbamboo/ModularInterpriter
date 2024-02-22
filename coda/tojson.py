@@ -371,6 +371,7 @@ Arguments:
                 _id = ""
                 _mode = ""
                 _link = ""
+                _filters = []
                 if "=" in operand:
                     _id = operand.split("=")[0]
                     _mode = operand.split("=")[1]
@@ -379,10 +380,13 @@ Arguments:
                 if ":" in _mode:
                     _mode = _mode.split(":")[0]
                     _link = operand.split(":")[1]
+                if "_" in _mode:
+                    _filters = _mode.split("_")[1].split("&")
+                    _mode = _mode.split("_")[0]
                 if _mode == "org": _mode = "original"
                 if _mode == "rem": _mode = "remainder"
                 if _mode == "res": _mode = "result"
-                jsonDict["passes"].append({"ind":hpieces,"id":_id,"mode":_mode,"link":_link})
+                jsonDict["passes"].append({"ind":hpieces,"id":_id,"mode":_mode,"link":_link,"filters":_filters})
                 lastPassInd += 1
             elif section == "opt":
                 if jsonDict.get("options") == None: jsonDict["options"] = []
@@ -499,7 +503,7 @@ f"""
     exklNms = [key for key in list(jsonDict.keys()) if key not in ["passes","options"]]
     if exklNms != []:
         if jsonDict.get("passes") == None or jsonDict.get("passes") == []:
-                jsonDict["passes"] = [ {"ind":[{"*":["*"]}],"id":"","mode":"","link":""} ]
+                jsonDict["passes"] = [ {"ind":[{"*":["*"]}],"id":"","mode":"","link":"","filters":[]} ]
         lengthMapping = createLenghtMapping(jsonDict,debug) # get length-mapping
         toRem = []
         for i,codapass in enumerate(jsonDict["passes"]):
@@ -510,7 +514,8 @@ f"""
                     "ind": codapass,
                     "id": "",
                     "mode": "",
-                    "link": ""
+                    "link": "",
+                    "filters": []
                 }
             nv = passSelectionSimplifier(codapass["ind"],lengthMapping,passIndexFallback,orgFallback,debug)
             if nv != []:
